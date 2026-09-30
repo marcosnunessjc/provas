@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado SAEP — Técnico em Desenvolvimento de Sistemas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFAF6; --paper-edge:#EFEAE0; --ink:#1C2430; --ink-soft:#5B6472;
+    --accent-red:#C21F3A; --accent-red-dark:#8F1329; --accent-gold:#A9834A;
+    --line:#DBD5C7; --success:#2E7D46; --warning-bg:#FFF4E5; --warning-border:#E8B65C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--paper-edge); color:var(--ink); font-family:'Inter',sans-serif; min-height:100vh; -webkit-user-select:none; user-select:none; }
+  input, textarea{ -webkit-user-select:text; user-select:text; }
+  .sheet{ max-width:820px; margin:0 auto; min-height:100vh; background:var(--paper); box-shadow:0 0 0 1px var(--line); display:flex; flex-direction:column; }
+  header.examhead{ position:sticky; top:0; z-index:10; background:var(--paper); border-bottom:2px solid var(--ink); padding:18px 32px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+  .brand{ font-family:'Lora',serif; font-weight:600; font-size:19px; letter-spacing:.2px; }
+  .brand small{ display:block; font-family:'Inter',sans-serif; font-weight:400; font-size:12px; color:var(--ink-soft); margin-top:2px;}
+  .status{ display:flex; align-items:center; gap:14px; }
+  .monitor{ display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:500; padding:6px 12px; border-radius:20px; border:1px solid var(--line); color:var(--ink-soft); }
+  .monitor .dot{ width:8px; height:8px; border-radius:50%; background:var(--success); }
+  .monitor.away .dot{ background:var(--accent-red); animation:pulse 1s infinite; }
+  .monitor.away{ color:var(--accent-red-dark); border-color:var(--accent-red); }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+  .timer{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:15px; padding:6px 12px; border:1px solid var(--ink); border-radius:4px; }
+  .timer.low{ color:var(--accent-red-dark); border-color:var(--accent-red); }
+  main{ flex:1; padding:32px; }
+  .start-box{ max-width:520px; margin:40px auto; text-align:left; }
+  .start-box h1{ font-family:'Lora',serif; font-size:26px; margin:0 0 6px; }
+  .start-box p.sub{ color:var(--ink-soft); margin:0 0 28px; font-size:14px; }
+  .rules{ background:var(--warning-bg); border:1px solid var(--warning-border); border-radius:6px; padding:16px 18px; margin:0 0 24px; font-size:13.5px; line-height:1.6; }
+  .rules b{ color:var(--accent-red-dark); }
+  label.field-label{ display:block; font-size:13px; font-weight:500; margin:0 0 6px; color:var(--ink-soft); }
+  input[type=text]{ width:100%; padding:10px 12px; font-size:15px; font-family:'Inter',sans-serif; border:1px solid var(--line); border-radius:4px; background:#fff; color:var(--ink); margin-bottom:18px; }
+  input[type=text]:focus{ outline:none; border-color:var(--ink); }
+  button{ font-family:'Inter',sans-serif; font-weight:500; font-size:14.5px; border:none; border-radius:4px; padding:12px 22px; cursor:pointer; }
+  .btn-primary{ background:var(--ink); color:#fff; }
+  .btn-primary:hover{ background:#0e141d; }
+  .btn-primary:disabled{ background:var(--line); color:var(--ink-soft); cursor:not-allowed; }
+  .btn-danger{ background:var(--accent-red); color:#fff; }
+  .btn-danger:hover{ background:var(--accent-red-dark); }
+  .btn-ghost{ background:transparent; border:1px solid var(--line); color:var(--ink); }
+  .qcard{ border:1px solid var(--line); border-radius:6px; padding:20px 22px; margin-bottom:18px; background:#fff; }
+  .qnum{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--accent-gold); font-weight:600; margin-bottom:6px; }
+  .qtext{ font-size:15.5px; line-height:1.55; margin:0 0 14px; }
+  .qtext.code-block{ font-family:'IBM Plex Mono',monospace; font-size:13.5px; white-space:pre-wrap; background:var(--paper-edge); padding:12px 14px; border-radius:6px; line-height:1.6; }
+  .opt{ display:flex; align-items:flex-start; gap:10px; padding:9px 10px; border-radius:4px; cursor:pointer; font-size:14.5px; line-height:1.45; }
+  .opt:hover{ background:var(--paper-edge); }
+  .opt input{ margin-top:3px; }
+  .opt .code-block{ display:block; font-family:'IBM Plex Mono',monospace; font-size:13px; white-space:pre-wrap; background:var(--paper-edge); padding:8px 10px; border-radius:4px; line-height:1.55; margin-top:2px; }
+  .footerbar{ display:flex; justify-content:space-between; align-items:center; padding:18px 32px; border-top:1px solid var(--line); background:var(--paper); }
+  .progress-txt{ font-size:13px; color:var(--ink-soft); }
+  .overlay{ position:fixed; inset:0; background:rgba(20,24,32,.55); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px; }
+  .overlay .card{ background:#fff; border-radius:8px; max-width:440px; width:100%; padding:28px 26px; text-align:center; border-top:5px solid var(--accent-gold); }
+  .overlay .card.danger{ border-top-color:var(--accent-red); }
+  .overlay h2{ font-family:'Lora',serif; font-size:20px; margin:0 0 10px; }
+  .overlay p{ font-size:14px; color:var(--ink-soft); line-height:1.55; margin:0 0 20px; }
+  .end-box{ max-width:520px; margin:50px auto; text-align:center; }
+  .end-box h1{ font-family:'Lora',serif; font-size:24px; margin:0 0 10px; }
+  .end-box p{ color:var(--ink-soft); font-size:14.5px; line-height:1.6; }
+  .score{ font-family:'IBM Plex Mono',monospace; font-size:38px; font-weight:600; margin:18px 0 4px; }
+  .resultbox{ background:var(--paper-edge); border:1px solid var(--line); border-radius:6px; padding:16px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; white-space:pre-wrap; text-align:left; margin:20px 0; word-break:break-all; }
+  .center-msg{ max-width:480px; margin:60px auto; text-align:center; color:var(--ink-soft); font-size:14.5px; }
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <header class="examhead">
+    <div class="brand">Simulado SAEP — Técnico em Desenvolvimento de Sistemas <small>SENAI Indaiatuba</small></div>
+    <div class="status">
+      <span class="timer" id="totalTimer">60:00</span>
+      <span class="monitor" id="monitorBadge"><span class="dot"></span> monitorando</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="screen-loading" class="center-msg">
+      <p>Carregando a prova...</p>
+    </section>
+
+    <section id="screen-load-error" class="center-msg hidden">
+      <p>Não foi possível carregar a prova. Verifique sua conexão com a internet e recarregue a página. Se o problema continuar, avise o professor.</p>
+    </section>
+
+    <section id="screen-start" class="start-box hidden">
+      <h1>Simulado SAEP — Técnico em Desenvolvimento de Sistemas</h1>
+      <p class="sub">Leia as instruções abaixo antes de iniciar.</p>
+      <div class="rules">
+        Esta prova é <b>monitorada</b>. Se você sair da aba/janela (trocar de aba, minimizar, abrir outro programa)
+        por <b>5 segundos ou mais</b>, a prova será <b>encerrada automaticamente</b>. Saídas curtas e repetidas
+        também são somadas: se o tempo total fora da página passar de 13 segundos, a prova também encerra.
+        A prova abre em <b>tela cheia</b> — sair da tela cheia conta como ausência.
+        Não é permitido consultar sites, aplicativos ou IAs durante a prova.
+      </div>
+      <label class="field-label" for="studentName">Nome completo do aluno</label>
+      <input type="text" id="studentName" placeholder="Digite seu nome completo">
+      <button class="btn-primary" id="startBtn" onclick="startExam()">Iniciar prova</button>
+    </section>
+
+    <section id="screen-already-done" class="end-box hidden">
+      <h1>Prova já realizada</h1>
+      <p>Já existe uma tentativa registrada para você (pelo seu nome ou pela sua conta Google). Não é possível refazer esta prova. Se você acredita que isso é um engano, procure o professor.</p>
+    </section>
+
+    <section id="screen-exam" class="hidden">
+      <div id="questionsContainer"></div>
+    </section>
+
+    <section id="screen-sending" class="center-msg hidden">
+      <p>Enviando suas respostas...</p>
+    </section>
+
+    <section id="screen-submit-error" class="end-box hidden">
+      <h1>Não foi possível enviar</h1>
+      <p>Suas respostas não chegaram ao servidor (verifique a internet). Copie o texto abaixo e envie ao professor por outro meio, para não perder o que você já respondeu.</p>
+      <div class="resultbox" id="payloadDump"></div>
+      <button class="btn-ghost" onclick="copyPayload()">Copiar respostas</button>
+      <button class="btn-primary" onclick="retrySubmit()" style="margin-left:8px;">Tentar novamente</button>
+    </section>
+
+    <section id="screen-finished" class="end-box hidden">
+      <h1>Prova concluída</h1>
+      <div class="score" id="scoreText">-</div>
+      <p>Resultado de <span id="studentNameOut"></span>.</p>
+      <div class="resultbox" id="resultDump"></div>
+      <button class="btn-ghost" onclick="copyResult()">Copiar resultado</button>
+    </section>
+
+    <section id="screen-ended" class="end-box hidden">
+      <h1>Prova encerrada</h1>
+      <p>A prova foi encerrada automaticamente porque <span id="studentNameOut2"></span> ficou <b>5 segundos ou mais</b> fora da página.</p>
+      <div class="resultbox" id="resultDump2"></div>
+      <button class="btn-ghost" onclick="copyResult()">Copiar resultado</button>
+    </section>
+  </main>
+
+  <div class="footerbar hidden" id="examFooter">
+    <span class="progress-txt" id="progressTxt">0 de 0 questões respondidas</span>
+    <button class="btn-danger" onclick="confirmFinish()">Finalizar prova</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="warnOverlay">
+  <div class="card">
+    <h2>Atenção</h2>
+    <p id="warnText">Você saiu da página por alguns segundos.</p>
+    <button class="btn-primary" onclick="closeWarning()">Continuar prova</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="fullscreenOverlay">
+  <div class="card danger">
+    <h2>Você saiu da tela cheia</h2>
+    <p id="fullscreenText">A prova exige tela cheia. Clique abaixo para continuar.</p>
+    <button class="btn-primary" onclick="resumeFullscreen()">Voltar à tela cheia</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="confirmOverlay">
+  <div class="card">
+    <h2>Finalizar prova?</h2>
+    <p>Você respondeu <span id="answeredCountTxt"></span>. Essa ação não pode ser desfeita.</p>
+    <button class="btn-ghost" onclick="closeConfirm()" style="margin-right:10px;">Voltar</button>
+    <button class="btn-danger" onclick="finishExam('finished')">Sim, finalizar</button>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyU4ny7oYVN0naneu8UW0Stgu-h0ZFFGaGEgKGGM6U4DkJAZulNW_J4RUyeHrJI0XSOWw/exec";
+const EXAM_TITLE = "Simulado SAEP — Técnico em Desenvolvimento de Sistemas";
+const INSTITUTION = "SENAI Indaiatuba";
+const AWAY_LIMIT_SECONDS = 5;
+const CUMULATIVE_LIMIT_SECONDS = Math.round(AWAY_LIMIT_SECONDS * 2.5);
+const WARNING_THRESHOLD_SECONDS = 3;
+const TOTAL_DURATION_MINUTES = 120;
+const FULLSCREEN_REQUIRED = true;
+
+let QUESTIONS = [];
+let examState = "loading";
+let studentName = "";
+let answers = {};
+let isAway = false;
+let awayStartTs = null;
+let awayTimeoutHandle = null;
+let cumulativeAwayMs = 0;
+let totalSecondsLeft = TOTAL_DURATION_MINUTES * 60;
+let totalTimerHandle = null;
+let startedAt = null;
+let lastPayload = null;
+
+function $(id){ return document.getElementById(id); }
+
+function isPageActive(){
+  const baseActive = document.visibilityState === "visible" && document.hasFocus();
+  if(!FULLSCREEN_REQUIRED) return baseActive;
+  return baseActive && !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
+function requestFullscreenBestEffort(){
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+  if(req){
+    try { req.call(el).catch(() => {}); } catch(e) {}
+  }
+}
+
+function resumeFullscreen(){
+  requestFullscreenBestEffort();
+}
+
+function escHtml(str){
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function shuffleArray(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+async function init(){
+  try {
+    const res = await fetch(SCRIPT_URL + "?action=questions");
+    const data = await res.json();
+    QUESTIONS = shuffleArray((data.questions || []).slice());
+    QUESTIONS.forEach(q => {
+      q._order = shuffleArray(q.options.map((_, i) => i));
+    });
+    $("screen-loading").classList.add("hidden");
+    $("screen-start").classList.remove("hidden");
+  } catch (err) {
+    $("screen-loading").classList.add("hidden");
+    $("screen-load-error").classList.remove("hidden");
+  }
+}
+window.addEventListener("DOMContentLoaded", init);
+
+async function startExam(){
+  const name = $("studentName").value.trim();
+  if(!name){
+    $("studentName").style.borderColor = "var(--accent-red)";
+    $("studentName").focus();
+    return;
+  }
+
+  if(FULLSCREEN_REQUIRED){
+    requestFullscreenBestEffort();
+  }
+
+  const btn = $("startBtn");
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Verificando...";
+
+  let blocked = false;
+  try {
+    const res = await fetch(SCRIPT_URL + (SCRIPT_URL.includes("?") ? "&" : "?") + "action=check&name=" + encodeURIComponent(name));
+    const data = await res.json();
+    blocked = !!data.alreadyAttempted;
+  } catch (err) {
+    blocked = false;
+  }
+
+  btn.disabled = false;
+  btn.textContent = originalLabel;
+
+  if(blocked){
+    $("screen-start").classList.add("hidden");
+    $("screen-already-done").classList.remove("hidden");
+    if(document.fullscreenElement || document.webkitFullscreenElement){
+      const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
+      if(exitFs){ try { exitFs.call(document).catch(() => {}); } catch(e) {} }
+    }
+    return;
+  }
+
+  studentName = name;
+  startedAt = new Date();
+  examState = "exam";
+  $("screen-start").classList.add("hidden");
+  $("screen-exam").classList.remove("hidden");
+  $("examFooter").classList.remove("hidden");
+  renderQuestions();
+  updateProgress();
+  if(TOTAL_DURATION_MINUTES > 0){
+    $("totalTimer").classList.remove("hidden");
+    totalTimerHandle = setInterval(tickTotalTimer, 1000);
+    updateTotalTimerDisplay();
+  } else {
+    $("totalTimer").classList.add("hidden");
+  }
+  document.addEventListener("visibilitychange", handleActivityChange);
+  window.addEventListener("blur", handleActivityChange);
+  window.addEventListener("focus", handleActivityChange);
+  document.addEventListener("fullscreenchange", handleActivityChange);
+  document.addEventListener("webkitfullscreenchange", handleActivityChange);
+  window.addEventListener("beforeunload", beforeUnloadHandler);
+}
+
+function renderQuestions(){
+  const container = $("questionsContainer");
+  container.innerHTML = "";
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement("div");
+    card.className = "qcard";
+    const optsHtml = q._order.map(oi => {
+      const raw = q.options[oi];
+      const isCode = raw.indexOf("\n") !== -1;
+      const body = isCode
+        ? `<span class="code-block">${escHtml(raw)}</span>`
+        : `<span>${escHtml(raw)}</span>`;
+      return `
+      <label class="opt">
+        <input type="radio" name="q${q.id}" value="${oi}" onchange="setAnswer(${q.id}, ${oi})">
+        ${body}
+      </label>
+    `;
+    }).join("");
+    const stemIsCode = q.text.indexOf("\n") !== -1;
+    const stemHtml = stemIsCode
+      ? `<p class="qtext code-block">${escHtml(q.text)}</p>`
+      : `<p class="qtext">${escHtml(q.text)}</p>`;
+    card.innerHTML = `
+      <div class="qnum">Questão ${qi + 1} de ${QUESTIONS.length}</div>
+      ${stemHtml}
+      ${optsHtml}
+    `;
+    container.appendChild(card);
+  });
+}
+
+function setAnswer(qid, optIndex){ answers[qid] = optIndex; updateProgress(); }
+function updateProgress(){
+  const answered = Object.keys(answers).length;
+  $("progressTxt").textContent = `${answered} de ${QUESTIONS.length} questões respondidas`;
+}
+
+function handleActivityChange(){
+  if(examState !== "exam") return;
+  const activeNow = isPageActive();
+
+  if(activeNow){
+    if(isAway){
+      clearTimeout(awayTimeoutHandle);
+      $("fullscreenOverlay").classList.add("hidden");
+      const durationMs = Date.now() - awayStartTs;
+      cumulativeAwayMs += durationMs;
+      isAway = false;
+      setMonitorBadge(false);
+
+      if(Math.round(cumulativeAwayMs / 1000) >= CUMULATIVE_LIMIT_SECONDS){
+        finishExam("ended");
+        return;
+      }
+      const durSec = Math.round(durationMs / 1000);
+      if(durSec >= WARNING_THRESHOLD_SECONDS){
+        showWarning(durSec);
+      }
+    }
+  } else {
+    if(!isAway){
+      isAway = true;
+      awayStartTs = Date.now();
+      setMonitorBadge(true);
+
+      const stillVisible = document.visibilityState === "visible" && document.hasFocus();
+      const missingFullscreen = FULLSCREEN_REQUIRED && !(document.fullscreenElement || document.webkitFullscreenElement);
+      if(stillVisible && missingFullscreen){
+        $("fullscreenText").textContent = `A prova exige tela cheia. Clique abaixo para continuar. Ausências de ${AWAY_LIMIT_SECONDS} segundos ou mais encerram a prova automaticamente.`;
+        $("fullscreenOverlay").classList.remove("hidden");
+      }
+
+      awayTimeoutHandle = setTimeout(() => {
+        finishExam("ended");
+      }, AWAY_LIMIT_SECONDS * 1000);
+    }
+  }
+}
+
+function setMonitorBadge(away){
+  const el = $("monitorBadge");
+  if(away){ el.classList.add("away"); el.innerHTML = '<span class="dot"></span> fora da página'; }
+  else { el.classList.remove("away"); el.innerHTML = '<span class="dot"></span> monitorando'; }
+}
+
+function showWarning(seconds){
+  if(seconds < WARNING_THRESHOLD_SECONDS) return;
+  $("warnText").textContent = `Você ficou ${seconds} segundo(s) fora da página. Ausências de ${AWAY_LIMIT_SECONDS} segundos ou mais encerram a prova automaticamente. Evite sair da aba.`;
+  $("warnOverlay").classList.remove("hidden");
+}
+function closeWarning(){ $("warnOverlay").classList.add("hidden"); }
+
+function tickTotalTimer(){
+  if(examState !== "exam") return;
+  totalSecondsLeft--;
+  updateTotalTimerDisplay();
+  if(totalSecondsLeft <= 0){ finishExam("finished"); }
+}
+function updateTotalTimerDisplay(){
+  const m = Math.floor(Math.max(totalSecondsLeft,0) / 60).toString().padStart(2,"0");
+  const s = Math.max(totalSecondsLeft,0) % 60;
+  const ss = s.toString().padStart(2,"0");
+  $("totalTimer").textContent = `${m}:${ss}`;
+  $("totalTimer").classList.toggle("low", totalSecondsLeft <= 60);
+}
+
+function confirmFinish(){
+  const answered = Object.keys(answers).length;
+  $("answeredCountTxt").textContent = `${answered} de ${QUESTIONS.length} questões`;
+  $("confirmOverlay").classList.remove("hidden");
+}
+function closeConfirm(){ $("confirmOverlay").classList.add("hidden"); }
+
+function beforeUnloadHandler(e){
+  if(examState === "exam"){ e.preventDefault(); e.returnValue = ""; }
+}
+
+async function finishExam(reason){
+  if(examState !== "exam") return;
+  examState = reason;
+  clearTimeout(awayTimeoutHandle);
+  clearInterval(totalTimerHandle);
+  document.removeEventListener("visibilitychange", handleActivityChange);
+  window.removeEventListener("blur", handleActivityChange);
+  window.removeEventListener("focus", handleActivityChange);
+  document.removeEventListener("fullscreenchange", handleActivityChange);
+  document.removeEventListener("webkitfullscreenchange", handleActivityChange);
+  window.removeEventListener("beforeunload", beforeUnloadHandler);
+  $("warnOverlay").classList.add("hidden");
+  $("fullscreenOverlay").classList.add("hidden");
+  $("confirmOverlay").classList.add("hidden");
+  $("examFooter").classList.add("hidden");
+  $("screen-exam").classList.add("hidden");
+
+  if(document.fullscreenElement || document.webkitFullscreenElement){
+    const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
+    if(exitFs){ try { exitFs.call(document).catch(() => {}); } catch(e) {} }
+  }
+
+  lastPayload = {
+    studentName: studentName,
+    answers: answers,
+    reason: reason,
+    startedAt: startedAt ? startedAt.toISOString() : null
+  };
+
+  await submitAndShow(reason);
+}
+
+async function submitAndShow(reason){
+  $("screen-submit-error").classList.add("hidden");
+  $("screen-sending").classList.remove("hidden");
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(lastPayload)
+    });
+    const result = await res.json();
+    $("screen-sending").classList.add("hidden");
+    if(result.alreadyAttempted){
+      $("screen-already-done").classList.remove("hidden");
+      return;
+    }
+    showResult(reason, result);
+  } catch (err) {
+    $("screen-sending").classList.add("hidden");
+    $("payloadDump").textContent = JSON.stringify(lastPayload, null, 2);
+    $("screen-submit-error").classList.remove("hidden");
+  }
+}
+
+function retrySubmit(){
+  submitAndShow(examState);
+}
+
+function showResult(reason, result){
+  const text = `Prova: ${EXAM_TITLE}
+Instituição: ${INSTITUTION}
+Aluno: ${studentName}
+Encerramento: ${new Date().toLocaleString("pt-BR")}
+Status: ${reason === "finished" ? "Concluída normalmente" : "Encerrada por ausência da página (" + AWAY_LIMIT_SECONDS + "s+)"}
+Pontuação: ${result.correctCount} / ${result.total}`;
+
+  if(reason === "finished"){
+    $("screen-finished").classList.remove("hidden");
+    $("studentNameOut").textContent = studentName;
+    $("scoreText").textContent = `${result.correctCount} / ${result.total}`;
+    $("resultDump").textContent = text;
+  } else {
+    $("screen-ended").classList.remove("hidden");
+    $("studentNameOut2").textContent = studentName;
+    $("resultDump2").textContent = text;
+  }
+}
+
+function copyResult(){
+  const box = examState === "finished" ? $("resultDump") : $("resultDump2");
+  navigator.clipboard.writeText(box.textContent).then(() => {
+    alert("Resultado copiado.");
+  }).catch(() => {
+    alert("Não foi possível copiar automaticamente. Selecione o texto manualmente.");
+  });
+}
+
+function copyPayload(){
+  navigator.clipboard.writeText($("payloadDump").textContent).then(() => {
+    alert("Respostas copiadas. Envie ao professor.");
+  }).catch(() => {
+    alert("Não foi possível copiar automaticamente. Selecione o texto manualmente.");
+  });
+}
+
+document.addEventListener("contextmenu", e => { if(examState === "exam") e.preventDefault(); });
+document.addEventListener("copy", e => { if(examState === "exam") e.preventDefault(); });
+</script>
+</body>
+</html>
